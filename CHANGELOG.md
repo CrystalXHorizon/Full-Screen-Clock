@@ -1,5 +1,10 @@
 ﻿# 版本记录
 
+- V0.8
+  - 清理仓库与本地构建产物，不再保留打包中间文件
+  - 新增 `.gitignore`，忽略 `build/`、`dist/`、`*.spec`、`__pycache__/`
+  - 新增 `scripts/build_client.ps1`：客户端默认输出到 `Downloads` 文件夹
+
 - V0.7
   - Release 工作流支持两种触发：推送 tag 或在 GitHub 发布 Release
   - 自动按版本名生成并上传 exe 资产（DesktopClock-vX.Y.exe）

@@ -27,7 +27,7 @@
 
 - `clock_app.py`：主程序源码
 - `CHANGELOG.md`：版本记录
-- `dist/DesktopClock.exe`：打包产物
+- `scripts/build_client.ps1`：打包脚本（客户端输出到 Downloads）
 
 ## 运行环境
 
@@ -48,13 +48,11 @@ py -3 clock_app.py
 
 ## 打包 EXE
 
+推荐（输出到 `Downloads`，且不在仓库保留构建垃圾）：
+
 ```powershell
-py -3 -m PyInstaller --noconfirm --clean --onefile --windowed --name DesktopClock --hidden-import PIL --hidden-import PIL.Image --hidden-import PIL.ImageTk clock_app.py
+.\scripts\build_client.ps1 -Version V0.8
 ```
-
-输出文件：
-
-- `dist/DesktopClock.exe`
 
 ## 快捷键
 
@@ -100,7 +98,7 @@ A Windows desktop clock app with fullscreen display, timing modes, customizable 
 
 - `clock_app.py`: main app source code
 - `CHANGELOG.md`: version history
-- `dist/DesktopClock.exe`: packaged executable
+- `scripts/build_client.ps1`: build script (outputs client to Downloads)
 
 ## Requirements
 
@@ -121,13 +119,11 @@ py -3 clock_app.py
 
 ## Build EXE
 
+Recommended (outputs to `Downloads` and keeps repo clean):
+
 ```powershell
-py -3 -m PyInstaller --noconfirm --clean --onefile --windowed --name DesktopClock --hidden-import PIL --hidden-import PIL.Image --hidden-import PIL.ImageTk clock_app.py
+.\scripts\build_client.ps1 -Version V0.8
 ```
-
-Output:
-
-- `dist/DesktopClock.exe`
 
 ## Shortcuts
 
