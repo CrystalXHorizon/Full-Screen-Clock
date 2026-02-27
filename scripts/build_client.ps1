@@ -1,5 +1,5 @@
 ﻿param(
-  [string]$Version = "V0.6"
+  [string]$Version = "V0.7"
 )
 
 $ErrorActionPreference = "Stop"
@@ -21,4 +21,5 @@ if (Test-Path $tempRoot) {
 py -3 -m PyInstaller --noconfirm --clean --onefile --windowed --name $name --distpath $downloadDir --workpath $workPath --specpath $specPath --hidden-import PIL --hidden-import PIL.Image --hidden-import PIL.ImageTk (Join-Path $projectRoot "clock_app.py")
 
 Write-Output "Build completed: $(Join-Path $downloadDir ($name + '.exe'))"
+
 

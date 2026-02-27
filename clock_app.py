@@ -11,7 +11,7 @@ except ImportError:
     Image = None
     ImageTk = None
 
-APP_VERSION = 'V0.6'
+APP_VERSION = 'V0.7'
 CONFIG_FILENAME = 'user_state.json'
 
 
@@ -56,6 +56,10 @@ class FullscreenClockApp:
         self._style_swatch = None
         self.toolbar_visible = True
         self.mode_label = None
+        self._last_time_key = None
+        self._last_desc_key = None
+        self._last_status_key = None
+        self._last_mode_label_text = None
 
         self.canvas = tk.Canvas(self.root, highlightthickness=0, bd=0)
         self.canvas.pack(fill='both', expand=True)
@@ -278,6 +282,8 @@ class FullscreenClockApp:
     def toggle_language(self) -> None:
         self.lang = 'en' if self.lang == 'zh' else 'zh'
         self.root.title(self.app_title())
+        self._last_status_key = None
+        self._last_mode_label_text = None
         if self.style_panel and self.style_panel.winfo_exists():
             self.style_panel.destroy()
             self.style_panel = None
@@ -711,11 +717,27 @@ class FullscreenClockApp:
             return
 
         display_time, mode_text = self.get_display_time()
-        self.canvas.itemconfigure(self.time_item, text=display_time, fill=self.text_color)
-        self.canvas.itemconfigure(self.desc_item, text=self.custom_text, fill=self.text_color)
-        self.canvas.itemconfigure(self.status_item, text=self.version_text(), fill=self.text_color)
+        time_key = (display_time, self.text_color)
+        if time_key != self._last_time_key:
+            self.canvas.itemconfigure(self.time_item, text=display_time, fill=self.text_color)
+            self._last_time_key = time_key
+
+        desc_key = (self.custom_text, self.text_color)
+        if desc_key != self._last_desc_key:
+            self.canvas.itemconfigure(self.desc_item, text=self.custom_text, fill=self.text_color)
+            self._last_desc_key = desc_key
+
+        status_text = self.version_text()
+        status_key = (status_text, self.text_color)
+        if status_key != self._last_status_key:
+            self.canvas.itemconfigure(self.status_item, text=status_text, fill=self.text_color)
+            self._last_status_key = status_key
+
+        mode_label_text = f"{self.t('mode_prefix')}: {mode_text}"
         if self.mode_label is not None:
-            self.mode_label.configure(text=f"{self.t('mode_prefix')}: {mode_text}")
+            if mode_label_text != self._last_mode_label_text:
+                self.mode_label.configure(text=mode_label_text)
+                self._last_mode_label_text = mode_label_text
 
         self.position_elements()
         self.root.after(200, self.update_ui)

@@ -51,7 +51,7 @@ py -3 clock_app.py
 推荐（输出到 `Downloads`，且不在仓库保留构建垃圾）：
 
 ```powershell
-.\scripts\build_client.ps1 -Version V0.6
+.\scripts\build_client.ps1 -Version V0.7
 ```
 
 ## 快捷键
@@ -122,7 +122,7 @@ py -3 clock_app.py
 Recommended (outputs to `Downloads` and keeps repo clean):
 
 ```powershell
-.\scripts\build_client.ps1 -Version V0.6
+.\scripts\build_client.ps1 -Version V0.7
 ```
 
 ## Shortcuts
@@ -137,4 +137,5 @@ Recommended (outputs to `Downloads` and keeps repo clean):
 - `S`: Pause/Resume timer
 - `Esc`: Exit fullscreen
 - `Q`: Quit app
+
 
