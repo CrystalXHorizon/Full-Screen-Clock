@@ -9,7 +9,7 @@ except ImportError:
     Image = None
     ImageTk = None
 
-APP_VERSION = 'V0.5'
+APP_VERSION = 'V0.6'
 
 
 class FullscreenClockApp:
