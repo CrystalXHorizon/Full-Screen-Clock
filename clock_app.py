@@ -1,4 +1,6 @@
 ﻿import os
+import json
+import sys
 import time
 import tkinter as tk
 from tkinter import colorchooser, filedialog, messagebox, simpledialog
@@ -9,7 +11,8 @@ except ImportError:
     Image = None
     ImageTk = None
 
-APP_VERSION = 'V0.8'
+APP_VERSION = 'V0.6'
+CONFIG_FILENAME = 'user_state.json'
 
 
 class FullscreenClockApp:
@@ -41,6 +44,7 @@ class FullscreenClockApp:
         self.bg_color = '#000000'
         self.bg_photo = None
         self.bg_scale_percent = 100
+        self.load_user_state()
 
         self.style_panel = None
         self.time_size_scale = None
@@ -324,7 +328,44 @@ class FullscreenClockApp:
 
     def quit_app(self) -> None:
         self.running = False
+        self.save_user_state()
         self.root.destroy()
+
+    def runtime_dir(self) -> str:
+        if getattr(sys, 'frozen', False):
+            return os.path.dirname(sys.executable)
+        return os.path.dirname(os.path.abspath(__file__))
+
+    def state_path(self) -> str:
+        return os.path.join(self.runtime_dir(), CONFIG_FILENAME)
+
+    def load_user_state(self) -> None:
+        path = self.state_path()
+        if not os.path.exists(path):
+            return
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            text = data.get('custom_text')
+            image_path = data.get('bg_path')
+            if isinstance(text, str):
+                self.custom_text = text
+            if isinstance(image_path, str) and os.path.exists(image_path):
+                self.bg_path = image_path
+        except Exception:
+            return
+
+    def save_user_state(self) -> None:
+        path = self.state_path()
+        data = {
+            'custom_text': self.custom_text,
+            'bg_path': self.bg_path,
+        }
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception:
+            return
 
     def set_mode(self, mode: str) -> None:
         self.mode = mode
@@ -563,6 +604,7 @@ class FullscreenClockApp:
                 return
 
         self.bg_path = path
+        self.save_user_state()
         self.redraw_background()
 
     def select_background_color(self) -> None:
@@ -571,6 +613,7 @@ class FullscreenClockApp:
             return
         self.bg_color = chosen
         self.bg_path = None
+        self.save_user_state()
         self.redraw_background()
 
     def edit_custom_text(self) -> None:
@@ -579,6 +622,7 @@ class FullscreenClockApp:
             return
         self.custom_text = text
         self.canvas.itemconfigure(self.desc_item, text=self.custom_text)
+        self.save_user_state()
 
     def redraw_background(self) -> None:
         width = max(self.root.winfo_width(), 1)
