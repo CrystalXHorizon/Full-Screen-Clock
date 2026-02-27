@@ -9,13 +9,14 @@ except ImportError:
     Image = None
     ImageTk = None
 
-APP_VERSION = 'V0.4'
+APP_VERSION = 'V0.5'
 
 
 class FullscreenClockApp:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title(f'Fullscreen Desktop Clock {APP_VERSION}')
+        self.lang = 'zh'
+        self.root.title(self.app_title())
         self.root.geometry('1280x720')
         self.root.minsize(900, 560)
         self.root.attributes('-fullscreen', False)
@@ -74,7 +75,7 @@ class FullscreenClockApp:
         self.status_item = self.canvas.create_text(
             20,
             20,
-            text=f'版本: {APP_VERSION}',
+            text=self.version_text(),
             fill=self.text_color,
             font=('Segoe UI', 18),
             anchor='nw',
@@ -116,10 +117,119 @@ class FullscreenClockApp:
         self.update_font_sizes()
         self.update_ui()
 
+    def app_title(self) -> str:
+        if self.lang == 'en':
+            return f'Fullscreen Desktop Clock {APP_VERSION}'
+        return f'全屏桌面时钟 {APP_VERSION}'
+
+    def version_text(self) -> str:
+        if self.lang == 'en':
+            return f'Version: {APP_VERSION}'
+        return f'版本: {APP_VERSION}'
+
+    def t(self, key: str) -> str:
+        zh = {
+            'mode_prefix': '模式',
+            'mode_clock': '当前时间',
+            'mode_countup': '正计时',
+            'mode_countdown': '倒计时',
+            'state_running': '运行',
+            'state_paused': '暂停',
+            'state_done': '结束',
+            'help': '帮助',
+            'bg_image': '背景图',
+            'bg_color': '背景色',
+            'text': '文字',
+            'mode': '模式',
+            'set_time': '设时间',
+            'style': '样式',
+            'reset': '重置',
+            'pause_resume': '暂停/继续',
+            'fullscreen': '全屏',
+            'hide_bar': '隐藏栏',
+            'quit': '退出',
+            'lang_switch': 'EN',
+            'style_title': '样式滑块',
+            'style_header': '字号 / 字体颜色(RGB) / 背景缩放',
+            'time_size': '时间字号',
+            'text_size': '文字字号',
+            'bg_scale': '背景缩放(%)',
+            'color_preview': '颜色预览',
+            'close': '关闭',
+            'help_title': '帮助',
+            'help_text': (
+                f'当前版本: {APP_VERSION}\n\n'
+                '底部按键可直接操作全部功能。\n\n'
+                '快捷键:\n'
+                'H 帮助\n'
+                'B 背景图片\n'
+                'C 背景颜色\n'
+                'T 自定义文字\n'
+                'F 打开样式滑块（字号/颜色/背景缩放）\n'
+                'M 切换模式\n'
+                'R 重置计时\n'
+                'S 暂停/继续\n'
+                '底栏可点“隐藏栏”，隐藏后只保留箭头\n'
+                'Esc 退出全屏\n'
+                'Q 退出程序\n'
+            ),
+        }
+        en = {
+            'mode_prefix': 'Mode',
+            'mode_clock': 'Clock',
+            'mode_countup': 'Count Up',
+            'mode_countdown': 'Count Down',
+            'state_running': 'Running',
+            'state_paused': 'Paused',
+            'state_done': 'Done',
+            'help': 'Help',
+            'bg_image': 'Image',
+            'bg_color': 'Color',
+            'text': 'Text',
+            'mode': 'Mode',
+            'set_time': 'Set Time',
+            'style': 'Style',
+            'reset': 'Reset',
+            'pause_resume': 'Pause/Resume',
+            'fullscreen': 'Fullscreen',
+            'hide_bar': 'Hide Bar',
+            'quit': 'Quit',
+            'lang_switch': '中文',
+            'style_title': 'Style Controls',
+            'style_header': 'Font Size / RGB Color / Background Scale',
+            'time_size': 'Time Size',
+            'text_size': 'Text Size',
+            'bg_scale': 'Background Scale (%)',
+            'color_preview': 'Color Preview',
+            'close': 'Close',
+            'help_title': 'Help',
+            'help_text': (
+                f'Current Version: {APP_VERSION}\n\n'
+                'Use the bottom toolbar for all features.\n\n'
+                'Shortcuts:\n'
+                'H Help\n'
+                'B Background Image\n'
+                'C Background Color\n'
+                'T Custom Text\n'
+                'F Style Controls (font/color/scale)\n'
+                'M Switch Mode\n'
+                'R Reset Timer\n'
+                'S Pause/Resume\n'
+                'Use "Hide Bar" to collapse toolbar to one arrow\n'
+                'Esc Exit Fullscreen\n'
+                'Q Quit\n'
+            ),
+        }
+        table = en if self.lang == 'en' else zh
+        return table[key]
+
     def build_controls(self) -> None:
+        for widget in self.controls.winfo_children():
+            widget.destroy()
+
         self.mode_label = tk.Label(
             self.controls,
-            text='模式: 当前时间',
+            text=f"{self.t('mode_prefix')}: {self.t('mode_clock')}",
             font=('Segoe UI', 11, 'bold'),
             fg='#EAF1F7',
             bg='#2A3440',
@@ -129,18 +239,19 @@ class FullscreenClockApp:
         self.mode_label.grid(row=0, column=0, padx=(4, 8))
 
         items = [
-            ('帮助', self.show_help),
-            ('背景图', self.select_background_image),
-            ('背景色', self.select_background_color),
-            ('文字', self.edit_custom_text),
-            ('模式', self.switch_mode),
-            ('设时间', self.set_time_value),
-            ('样式', self.open_style_panel),
-            ('重置', self.reset_mode_timer),
-            ('暂停/继续', self.toggle_pause),
-            ('全屏', lambda: self.toggle_fullscreen(True)),
-            ('隐藏栏', lambda: self.set_toolbar_visible(False)),
-            ('退出', self.quit_app),
+            (self.t('help'), self.show_help),
+            (self.t('bg_image'), self.select_background_image),
+            (self.t('bg_color'), self.select_background_color),
+            (self.t('text'), self.edit_custom_text),
+            (self.t('mode'), self.switch_mode),
+            (self.t('set_time'), self.set_time_value),
+            (self.t('style'), self.open_style_panel),
+            (self.t('reset'), self.reset_mode_timer),
+            (self.t('pause_resume'), self.toggle_pause),
+            (self.t('fullscreen'), lambda: self.toggle_fullscreen(True)),
+            (self.t('hide_bar'), lambda: self.set_toolbar_visible(False)),
+            (self.t('lang_switch'), self.toggle_language),
+            (self.t('quit'), self.quit_app),
         ]
         for i, (label, cmd) in enumerate(items):
             btn = tk.Button(
@@ -159,6 +270,14 @@ class FullscreenClockApp:
                 cursor='hand2',
             )
             btn.grid(row=0, column=i + 1, padx=2)
+
+    def toggle_language(self) -> None:
+        self.lang = 'en' if self.lang == 'zh' else 'zh'
+        self.root.title(self.app_title())
+        if self.style_panel and self.style_panel.winfo_exists():
+            self.style_panel.destroy()
+            self.style_panel = None
+        self.build_controls()
 
     def set_toolbar_visible(self, visible: bool) -> None:
         self.toolbar_visible = visible
@@ -198,23 +317,7 @@ class FullscreenClockApp:
         self.root.bind('Q', lambda _: self.quit_app())
 
     def show_help(self) -> None:
-        message = (
-            f'当前版本: {APP_VERSION}\n\n'
-            '底部按键可直接操作全部功能。\n\n'
-            '快捷键:\n'
-            'H 帮助\n'
-            'B 背景图片\n'
-            'C 背景颜色\n'
-            'T 自定义文字\n'
-            'F 打开样式滑块（字号/颜色/背景缩放）\n'
-            'M 切换模式\n'
-            'R 重置计时\n'
-            'S 暂停/继续\n'
-            '底栏可点“隐藏栏”，隐藏后只保留箭头\n'
-            'Esc 退出全屏\n'
-            'Q 退出程序\n'
-        )
-        messagebox.showinfo('帮助', message)
+        messagebox.showinfo(self.t('help_title'), self.t('help_text'))
 
     def toggle_fullscreen(self, enabled: bool) -> None:
         self.root.attributes('-fullscreen', enabled)
@@ -296,7 +399,7 @@ class FullscreenClockApp:
             return
 
         panel = tk.Toplevel(self.root)
-        panel.title('样式滑块')
+        panel.title(self.t('style_title'))
         panel.geometry('420x430')
         panel.resizable(False, False)
         panel.configure(bg='#111111')
@@ -304,19 +407,19 @@ class FullscreenClockApp:
 
         self.style_panel = panel
 
-        header = tk.Label(panel, text='字号 / 字体颜色(RGB) / 背景缩放', fg='white', bg='#111111', font=('Segoe UI', 12, 'bold'))
+        header = tk.Label(panel, text=self.t('style_header'), fg='white', bg='#111111', font=('Segoe UI', 12, 'bold'))
         header.pack(anchor='w', padx=16, pady=(12, 6))
 
-        self.time_size_scale = self._create_scale(panel, '时间字号', 24, 240, self.time_font_size, self._apply_style)
-        self.text_size_scale = self._create_scale(panel, '文字字号', 12, 120, self.text_font_size, self._apply_style)
-        self.bg_size_scale = self._create_scale(panel, '背景缩放(%)', 20, 300, self.bg_scale_percent, self._apply_style)
+        self.time_size_scale = self._create_scale(panel, self.t('time_size'), 24, 240, self.time_font_size, self._apply_style)
+        self.text_size_scale = self._create_scale(panel, self.t('text_size'), 12, 120, self.text_font_size, self._apply_style)
+        self.bg_size_scale = self._create_scale(panel, self.t('bg_scale'), 20, 300, self.bg_scale_percent, self._apply_style)
 
         r, g, b = self.hex_to_rgb(self.text_color)
         self.r_scale = self._create_scale(panel, 'R', 0, 255, r, self._apply_style)
         self.g_scale = self._create_scale(panel, 'G', 0, 255, g, self._apply_style)
         self.b_scale = self._create_scale(panel, 'B', 0, 255, b, self._apply_style)
 
-        tk.Label(panel, text='颜色预览', fg='white', bg='#111111', font=('Segoe UI', 10)).pack(anchor='w', padx=16, pady=(8, 4))
+        tk.Label(panel, text=self.t('color_preview'), fg='white', bg='#111111', font=('Segoe UI', 10)).pack(anchor='w', padx=16, pady=(8, 4))
         swatch = tk.Label(panel, text='      ', bg=self.text_color, relief='flat')
         swatch.pack(anchor='w', padx=16, pady=(0, 8))
 
@@ -328,7 +431,7 @@ class FullscreenClockApp:
 
         tk.Button(
             btn_row,
-            text='关闭',
+            text=self.t('close'),
             command=panel.destroy,
             font=('Segoe UI', 10),
             fg='white',
@@ -533,25 +636,25 @@ class FullscreenClockApp:
     def get_display_time(self) -> tuple[str, str]:
         if self.mode == 'clock':
             ts = time.time() + self.clock_offset_seconds
-            return time.strftime('%H:%M:%S', time.localtime(ts)), '当前时间'
+            return time.strftime('%H:%M:%S', time.localtime(ts)), self.t('mode_clock')
 
         if self.count_start is None:
             self.count_start = time.time()
 
         if self.paused:
             elapsed = int((self.pause_started_at or time.time()) - self.count_start - self.paused_duration)
-            state = '暂停'
+            state = self.t('state_paused')
         else:
             elapsed = int(time.time() - self.count_start - self.paused_duration)
-            state = '运行'
+            state = self.t('state_running')
 
         if self.mode == 'countup':
-            return self.format_hms(elapsed), f'正计时 ({state})'
+            return self.format_hms(elapsed), f"{self.t('mode_countup')} ({state})"
 
         remain = self.countdown_total - elapsed
         if remain <= 0:
-            return '00:00:00', '倒计时 (结束)'
-        return self.format_hms(remain), f'倒计时 ({state})'
+            return '00:00:00', f"{self.t('mode_countdown')} ({self.t('state_done')})"
+        return self.format_hms(remain), f"{self.t('mode_countdown')} ({state})"
 
     def position_elements(self) -> None:
         width = self.root.winfo_width()
@@ -566,9 +669,9 @@ class FullscreenClockApp:
         display_time, mode_text = self.get_display_time()
         self.canvas.itemconfigure(self.time_item, text=display_time, fill=self.text_color)
         self.canvas.itemconfigure(self.desc_item, text=self.custom_text, fill=self.text_color)
-        self.canvas.itemconfigure(self.status_item, text=f'版本: {APP_VERSION}', fill=self.text_color)
+        self.canvas.itemconfigure(self.status_item, text=self.version_text(), fill=self.text_color)
         if self.mode_label is not None:
-            self.mode_label.configure(text=f'模式: {mode_text}')
+            self.mode_label.configure(text=f"{self.t('mode_prefix')}: {mode_text}")
 
         self.position_elements()
         self.root.after(200, self.update_ui)
