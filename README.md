@@ -1,4 +1,77 @@
-﻿# Desktop Clock (Windows)
+﻿# 全屏桌面时钟（Windows）
+
+一款 Windows 桌面时钟应用，支持全屏显示、正倒计时、文字样式自定义，以及仿磨砂玻璃功能栏。
+
+## 功能特性
+
+- 实时时钟显示（`HH:MM:SS`）
+- `正计时（Count Up）` 与 `倒计时（Count Down）`
+- 手动设置显示时间（`HH:MM:SS`）
+- 自定义展示文字
+- 样式面板：
+  - 时间字号滑块 + 数字输入
+  - 文字字号滑块 + 数字输入
+  - RGB 颜色滑块 + 数字输入
+- 背景自定义：
+  - 可选择背景图或纯色背景
+  - 背景缩放滑块（`20%` ~ `300%`）+ 数字输入
+- 底部仿磨砂玻璃风格功能栏
+- 模式显示集成在功能栏内
+- 功能栏隐藏/显示：
+  - 点击 `隐藏栏` 隐藏
+  - 隐藏后保留一个箭头按钮用于恢复
+- 支持切换全屏
+- 支持打包单文件 `.exe`
+
+## 项目文件
+
+- `clock_app.py`：主程序源码
+- `CHANGELOG.md`：版本记录
+- `dist/DesktopClock.exe`：打包产物
+
+## 运行环境
+
+- Python 3.12+
+- Pillow（用于更完整的图片格式支持与高质量缩放）
+
+安装依赖：
+
+```powershell
+py -3 -m pip install pillow
+```
+
+## 源码运行
+
+```powershell
+py -3 clock_app.py
+```
+
+## 打包 EXE
+
+```powershell
+py -3 -m PyInstaller --noconfirm --clean --onefile --windowed --name DesktopClock --hidden-import PIL --hidden-import PIL.Image --hidden-import PIL.ImageTk clock_app.py
+```
+
+输出文件：
+
+- `dist/DesktopClock.exe`
+
+## 快捷键
+
+- `H`：帮助
+- `B`：选择背景图片
+- `C`：选择背景颜色
+- `T`：编辑自定义文字
+- `F`：打开样式面板
+- `M`：切换模式
+- `R`：重置计时
+- `S`：暂停/继续计时
+- `Esc`：退出全屏
+- `Q`：退出程序
+
+---
+
+# Desktop Clock (Windows)
 
 A Windows desktop clock app with fullscreen display, timing modes, customizable text styles, and a frosted-glass control bar.
 
