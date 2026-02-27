@@ -1,5 +1,10 @@
 ﻿# 版本记录
 
+- V0.7
+  - Release 工作流支持两种触发：推送 tag 或在 GitHub 发布 Release
+  - 自动按版本名生成并上传 exe 资产（DesktopClock-vX.Y.exe）
+  - 自动生成 Release Notes
+
 - V0.6
   - 生成可直接运行的集成环境客户端，文件名追加版本号（本机与 Release 资产一致）
   - 发布流程改为按 tag 自动输出带版本号的 exe 文件名

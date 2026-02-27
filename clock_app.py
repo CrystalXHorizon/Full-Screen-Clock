@@ -9,7 +9,7 @@ except ImportError:
     Image = None
     ImageTk = None
 
-APP_VERSION = 'V0.6'
+APP_VERSION = 'V0.7'
 
 
 class FullscreenClockApp:
@@ -686,4 +686,5 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+
 

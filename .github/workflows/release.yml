@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - "v*"
+  release:
+    types:
+      - published
 
 permissions:
   contents: write
@@ -11,6 +14,8 @@ permissions:
 jobs:
   build-and-release:
     runs-on: windows-latest
+    env:
+      TAG_NAME: ${{ github.event.release.tag_name || github.ref_name }}
 
     steps:
       - name: Checkout
@@ -28,10 +33,12 @@ jobs:
 
       - name: Build EXE
         run: |
-          $exeName = "DesktopClock-$env:GITHUB_REF_NAME"
+          $exeName = "DesktopClock-$env:TAG_NAME"
           py -3 -m PyInstaller --noconfirm --clean --onefile --windowed --name $exeName --hidden-import PIL --hidden-import PIL.Image --hidden-import PIL.ImageTk clock_app.py
 
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/DesktopClock-${{ github.ref_name }}.exe
+          tag_name: ${{ env.TAG_NAME }}
+          files: dist/DesktopClock-${{ env.TAG_NAME }}.exe
+          generate_release_notes: true
