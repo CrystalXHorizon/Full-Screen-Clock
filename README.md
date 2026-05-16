@@ -2,6 +2,14 @@
 
 一款 Windows 桌面时钟应用，支持全屏显示、正倒计时、文字样式自定义，以及仿磨砂玻璃功能栏。
 
+## About
+
+- **当前版本**: V0.9
+- **技术栈**: Python 3.12+, Tkinter, Pillow
+- **构建**: PyInstaller 单文件 exe
+- **许可**: MIT
+- **项目地址**: [github.com/CrystalXHorizon/Full-Screen-Clock](https://github.com/CrystalXHorizon/Full-Screen-Clock)
+
 ## 功能特性
 
 - 实时时钟显示（`HH:MM:SS`）
@@ -11,6 +19,7 @@
 - 样式面板：
   - 时间字号滑块 + 数字输入
   - 文字字号滑块 + 数字输入
+  - 字体选择（9 种）、粗体、投影
   - RGB 颜色滑块 + 数字输入
 - 背景自定义：
   - 可选择背景图或纯色背景
@@ -20,7 +29,9 @@
 - 功能栏隐藏/显示：
   - 点击 `隐藏栏` 隐藏
   - 隐藏后保留一个箭头按钮用于恢复
-- 支持切换全屏
+- 中/英文界面切换
+- 全屏/窗口切换（按钮自动切换文字）
+- 状态持久化（自动保存恢复配置）
 - 支持打包单文件 `.exe`
 
 ## 项目文件
@@ -51,7 +62,7 @@ py -3 clock_app.py
 推荐（输出到 `Downloads`，且不在仓库保留构建垃圾）：
 
 ```powershell
-.\scripts\build_client.ps1 -Version V0.7
+.\scripts\build_client.ps1 -Version V0.9
 ```
 
 ## 快捷键
@@ -60,6 +71,7 @@ py -3 clock_app.py
 - `B`：选择背景图片
 - `C`：选择背景颜色
 - `T`：编辑自定义文字
+- `L`：选择描述文字颜色
 - `F`：打开样式面板
 - `M`：切换模式
 - `R`：重置计时
@@ -73,6 +85,14 @@ py -3 clock_app.py
 
 A Windows desktop clock app with fullscreen display, timing modes, customizable text styles, and a frosted-glass control bar.
 
+## About
+
+- **Version**: V0.9
+- **Stack**: Python 3.12+, Tkinter, Pillow
+- **Build**: PyInstaller single-file exe
+- **License**: MIT
+- **Repository**: [github.com/CrystalXHorizon/Full-Screen-Clock](https://github.com/CrystalXHorizon/Full-Screen-Clock)
+
 ## Features
 
 - Real-time clock display (`HH:MM:SS`)
@@ -82,6 +102,7 @@ A Windows desktop clock app with fullscreen display, timing modes, customizable 
 - Text style panel:
   - Time font size slider + numeric input
   - Text font size slider + numeric input
+  - Font selection (9), bold, shadow toggle
   - RGB color sliders + numeric inputs
 - Background customization:
   - Select image or solid color background
@@ -91,7 +112,9 @@ A Windows desktop clock app with fullscreen display, timing modes, customizable 
 - Toolbar hide/show:
   - Click `隐藏栏` to hide
   - Keep only one arrow button to restore toolbar
-- Fullscreen toggle
+- Chinese/English language toggle
+- Fullscreen toggle (button text changes with state)
+- State persistence (auto-save/restore config)
 - Packaged single-file `.exe` support
 
 ## Project Files
@@ -122,7 +145,7 @@ py -3 clock_app.py
 Recommended (outputs to `Downloads` and keeps repo clean):
 
 ```powershell
-.\scripts\build_client.ps1 -Version V0.7
+.\scripts\build_client.ps1 -Version V0.9
 ```
 
 ## Shortcuts
@@ -131,11 +154,10 @@ Recommended (outputs to `Downloads` and keeps repo clean):
 - `B`: Select background image
 - `C`: Select background color
 - `T`: Edit custom text
+- `L`: Select description text color
 - `F`: Open style panel
 - `M`: Switch mode
 - `R`: Reset timer
 - `S`: Pause/Resume timer
 - `Esc`: Exit fullscreen
 - `Q`: Quit app
-
-
