@@ -4,7 +4,7 @@
 
 ## About
 
-- **当前版本**: V0.9
+- **当前版本**: V1.0
 - **技术栈**: Python 3.12+, Tkinter, Pillow
 - **构建**: PyInstaller 单文件 exe
 - **许可**: MIT
@@ -15,11 +15,12 @@
 - 实时时钟显示（`HH:MM:SS`）
 - `正计时（Count Up）` 与 `倒计时（Count Down）`
 - 手动设置显示时间（`HH:MM:SS`）
-- 自定义展示文字
+- 自定义展示文字（支持多行，回车换行）
 - 样式面板：
   - 时间字号滑块 + 数字输入
   - 文字字号滑块 + 数字输入
-  - 字体选择（9 种）、粗体、投影
+  - 时间字体选择（9 种）、粗体、投影
+  - 描述文字字体选择（9 种）、粗体
   - RGB 颜色滑块 + 数字输入
 - 背景自定义：
   - 可选择背景图或纯色背景
@@ -87,7 +88,7 @@ A Windows desktop clock app with fullscreen display, timing modes, customizable 
 
 ## About
 
-- **Version**: V0.9
+- **Version**: V1.0
 - **Stack**: Python 3.12+, Tkinter, Pillow
 - **Build**: PyInstaller single-file exe
 - **License**: MIT
@@ -98,11 +99,12 @@ A Windows desktop clock app with fullscreen display, timing modes, customizable 
 - Real-time clock display (`HH:MM:SS`)
 - `Count Up` and `Count Down` modes
 - Set current displayed time manually (`HH:MM:SS`)
-- Custom text content
+- Custom text content (multi-line supported)
 - Text style panel:
   - Time font size slider + numeric input
   - Text font size slider + numeric input
-  - Font selection (9), bold, shadow toggle
+  - Time font selection (9), bold, shadow
+  - Text font selection (9), bold
   - RGB color sliders + numeric inputs
 - Background customization:
   - Select image or solid color background

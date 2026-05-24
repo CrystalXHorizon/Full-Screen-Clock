@@ -11,7 +11,7 @@ except ImportError:
     Image = None
     ImageTk = None
 
-APP_VERSION = 'V0.8'
+APP_VERSION = 'V1.0'
 CONFIG_FILENAME = 'user_state.json'
 
 # ── Dark-themed dialog helpers ──────────────────────────────────────────────
@@ -208,6 +208,70 @@ def dark_askinteger(
     return result[0]
 
 
+def dark_asktext(
+    parent: tk.Tk, title: str, prompt: str, *,
+    initialvalue: str = '', ok_text: str = 'OK', cancel_text: str = 'Cancel',
+) -> str | None:
+    d = tk.Toplevel(parent)
+    d.title(title)
+    d.configure(bg='#0d0d18')
+    d.resizable(True, True)
+    d.minsize(380, 240)
+    d.attributes('-topmost', True)
+    d.transient(parent)
+    result: list[str | None] = [None]
+
+    body = tk.Frame(d, bg='#0d0d18')
+    body.pack(fill='both', expand=True, padx=28, pady=22)
+
+    tk.Frame(body, bg='#6366f1', height=3).pack(fill='x', pady=(0, 14))
+
+    tk.Label(
+        body, text=prompt, fg='#c8c8e0', bg='#0d0d18', font=('Segoe UI', 11),
+    ).pack(anchor='w', pady=(0, 10))
+
+    text_widget = tk.Text(
+        body, font=('Segoe UI', 13), fg='#e0e0f0', bg='#1a1a28',
+        insertbackground='#e0e0f0', relief='flat', bd=0,
+        highlightthickness=1, highlightbackground='#2e2e48', highlightcolor='#6366f1',
+        wrap='word', height=5,
+    )
+    text_widget.insert('1.0', initialvalue)
+    text_widget.pack(fill='both', expand=True, ipady=7, pady=(0, 16))
+    text_widget.focus_set()
+
+    def _ok() -> None:
+        result[0] = text_widget.get('1.0', 'end-1c')
+        d.destroy()
+
+    def _cancel() -> None:
+        result[0] = None
+        d.destroy()
+
+    row = tk.Frame(body, bg='#0d0d18')
+    row.pack(fill='x')
+    tk.Button(
+        row, text=cancel_text, command=_cancel,
+        font=('Segoe UI', 10), fg='#a0a0b8', bg='#1a1a28',
+        activeforeground='#ffffff', activebackground='#282844',
+        relief='flat', padx=14, pady=6, cursor='hand2',
+    ).pack(side='right', padx=(6, 0))
+    tk.Button(
+        row, text=ok_text, command=_ok,
+        font=('Segoe UI', 10, 'bold'), fg='#ffffff', bg='#6366f1',
+        activeforeground='#ffffff', activebackground='#818cf8',
+        relief='flat', padx=22, pady=6, cursor='hand2',
+    ).pack(side='right')
+
+    _center_dialog(d, parent)
+    d.grab_set()
+    d.bind('<Control-Return>', lambda _e: _ok())
+    d.bind('<Escape>', lambda _e: _cancel())
+    d.protocol('WM_DELETE_WINDOW', _cancel)
+    parent.wait_window(d)
+    return result[0]
+
+
 class FullscreenClockApp:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
@@ -242,6 +306,8 @@ class FullscreenClockApp:
         self.time_font_family = 'Segoe UI'
         self.time_bold = False
         self.time_shadow = True
+        self.text_font_family = 'Segoe UI'
+        self.text_bold = False
         self.load_user_state()
 
         self.style_panel = None
@@ -289,7 +355,7 @@ class FullscreenClockApp:
             0,
             text=self.custom_text,
             fill=self.desc_color,
-            font=('Segoe UI', self.text_font_size),
+            font=self._desc_font(),
             anchor='center',
         )
         self.status_item = self.canvas.create_text(
@@ -388,6 +454,8 @@ class FullscreenClockApp:
             'time_font_label': '时间字体',
             'time_bold_label': '粗体',
             'time_shadow_label': '投影',
+            'text_font_label': '描述文字字体',
+            'text_bold_label': '描述文字粗体',
             'desc_color_label': '文字颜色',
             'desc_color_pick': '选择',
             'desc_color_reset': '还原',
@@ -398,7 +466,7 @@ class FullscreenClockApp:
             'dialog_set_time_prompt': '输入显示时间 (HH:MM:SS):',
             'dialog_time_error': '格式错误',
             'dialog_time_error_msg': '请使用 HH:MM:SS，例如 08:30:00',
-            'dialog_custom_text_prompt': '请输入要显示的文字:',
+            'dialog_custom_text_prompt': '请输入要显示的文字（回车换行，Ctrl+回车确认）:',
             'dialog_bg_error': '背景错误',
             'dialog_bg_pillow_msg': '当前环境未安装 Pillow，仅支持 png/gif/ppm/pgm。\n请安装 Pillow 后使用 jpg/jpeg/bmp。',
             'dialog_bg_load_fail': '加载背景失败',
@@ -413,9 +481,9 @@ class FullscreenClockApp:
                 'H 帮助\n'
                 'B 背景图片\n'
                 'C 背景颜色\n'
-                'T 自定义文字\n'
+                'T 自定义文字（支持多行，回车换行）\n'
                 'L 文字颜色\n'
-                'F 打开样式滑块（字号/颜色/背景缩放）\n'
+                'F 打开样式滑块（字号/字体/颜色）\n'
                 'M 切换模式\n'
                 'R 重置计时\n'
                 'S 暂停/继续\n'
@@ -457,6 +525,8 @@ class FullscreenClockApp:
             'time_font_label': 'Time Font',
             'time_bold_label': 'Bold',
             'time_shadow_label': 'Shadow',
+            'text_font_label': 'Text Font',
+            'text_bold_label': 'Text Bold',
             'desc_color_label': 'Text Color',
             'desc_color_pick': 'Pick',
             'desc_color_reset': 'Reset',
@@ -467,7 +537,7 @@ class FullscreenClockApp:
             'dialog_set_time_prompt': 'Enter display time (HH:MM:SS):',
             'dialog_time_error': 'Format Error',
             'dialog_time_error_msg': 'Please use HH:MM:SS, e.g. 08:30:00',
-            'dialog_custom_text_prompt': 'Enter text to display:',
+            'dialog_custom_text_prompt': 'Enter text to display (Enter=newline, Ctrl+Enter=confirm):',
             'dialog_bg_error': 'Background Error',
             'dialog_bg_pillow_msg': 'Pillow is not installed. Only png/gif/ppm/pgm are supported.\nPlease install Pillow for jpg/jpeg/bmp support.',
             'dialog_bg_load_fail': 'Failed to load background',
@@ -482,9 +552,9 @@ class FullscreenClockApp:
                 'H Help\n'
                 'B Background Image\n'
                 'C Background Color\n'
-                'T Custom Text\n'
+                'T Custom Text (multi-line supported)\n'
                 'L Text Color\n'
-                'F Style Controls (font/color/scale)\n'
+                'F Style Controls (font/weight/color)\n'
                 'M Switch Mode\n'
                 'R Reset Timer\n'
                 'S Pause/Resume\n'
@@ -695,6 +765,10 @@ class FullscreenClockApp:
                 self.time_bold = data['time_bold']
             if isinstance(data.get('time_shadow'), bool):
                 self.time_shadow = data['time_shadow']
+            if isinstance(data.get('text_font_family'), str):
+                self.text_font_family = data['text_font_family']
+            if isinstance(data.get('text_bold'), bool):
+                self.text_bold = data['text_bold']
             if isinstance(data.get('desc_color'), str) and data['desc_color'].startswith('#'):
                 self.desc_color = data['desc_color']
         except Exception as e:
@@ -710,6 +784,8 @@ class FullscreenClockApp:
             'time_font_family': self.time_font_family,
             'time_bold': self.time_bold,
             'time_shadow': self.time_shadow,
+            'text_font_family': self.text_font_family,
+            'text_bold': self.text_bold,
             'desc_color': self.desc_color,
         }
         try:
@@ -867,6 +943,40 @@ class FullscreenClockApp:
             activeforeground='#ffffff',
         ).pack(side='left')
 
+        # ── Text font & weight ──
+        tk.Label(panel, text=self.t('text_font_label'), fg='#c8c8e0', bg='#0d0d18',
+                 font=('Segoe UI', 10)).pack(anchor='w', padx=16, pady=(14, 4))
+
+        text_fonts_row = tk.Frame(panel, bg='#0d0d18')
+        text_fonts_row.pack(fill='x', padx=16, pady=(0, 4))
+        available_text_fonts = ['Segoe UI', 'Microsoft YaHei', 'Consolas', 'Cascadia Mono',
+                                'Arial', 'Georgia', 'Times New Roman', 'Impact', 'Courier New']
+        self._text_font_var = tk.StringVar(value=self.text_font_family)
+        text_mb = tk.Menubutton(text_fonts_row, textvariable=self._text_font_var,
+                                font=('Segoe UI', 10), fg='#e0e0f0', bg='#1a1a28',
+                                activeforeground='#ffffff', activebackground='#282844',
+                                relief='flat', padx=10, pady=5, cursor='hand2',
+                                direction='below', indicatoron=True)
+        text_mb.pack(side='left')
+        text_font_menu = tk.Menu(text_mb, tearoff=0, font=('Segoe UI', 10),
+                                 bg='#1a1a28', fg='#e0e0f0',
+                                 activebackground='#282844', activeforeground='#ffffff')
+        for fn in available_text_fonts:
+            text_font_menu.add_command(
+                label=fn,
+                command=lambda f=fn: (self._text_font_var.set(f), self._apply_style()),
+            )
+        text_mb.configure(menu=text_font_menu)
+
+        self._text_bold_var = tk.BooleanVar(value=self.text_bold)
+        tk.Checkbutton(
+            text_fonts_row, text=self.t('text_bold_label'), variable=self._text_bold_var,
+            command=self._apply_style,
+            font=('Segoe UI', 10), fg='#c8c8e0', bg='#0d0d18',
+            selectcolor='#1a1a28', activebackground='#0d0d18',
+            activeforeground='#ffffff',
+        ).pack(side='left', padx=(12, 0))
+
         # ── RGB ──
         r, g, b = self.hex_to_rgb(self.text_color)
         self.r_scale = self._create_scale(panel, 'R', 0, 255, r, self._apply_style)
@@ -906,6 +1016,8 @@ class FullscreenClockApp:
             self._font_var = None
             self._bold_var = None
             self._shadow_var = None
+            self._text_font_var = None
+            self._text_bold_var = None
             self.style_panel = None
             if panel.winfo_exists():
                 panel.destroy()
@@ -991,6 +1103,11 @@ class FullscreenClockApp:
         if hasattr(self, '_shadow_var') and self._shadow_var is not None:
             self.time_shadow = self._shadow_var.get()
 
+        if hasattr(self, '_text_font_var') and self._text_font_var is not None:
+            self.text_font_family = self._text_font_var.get()
+        if hasattr(self, '_text_bold_var') and self._text_bold_var is not None:
+            self.text_bold = self._text_bold_var.get()
+
         if hasattr(self, '_style_swatch') and self._style_swatch is not None:
             self._style_swatch.configure(bg=self.text_color)
         self.apply_time_font()
@@ -1001,12 +1118,16 @@ class FullscreenClockApp:
         weight = 'bold' if self.time_bold else 'normal'
         return (self.time_font_family, self.time_font_size, weight)
 
+    def _desc_font(self) -> tuple:
+        weight = 'bold' if self.text_bold else 'normal'
+        return (self.text_font_family, self.text_font_size, weight)
+
     def apply_time_font(self) -> None:
-        font = self._time_font()
+        time_font = self._time_font()
         state = 'normal' if self.time_shadow else 'hidden'
-        self.canvas.itemconfigure(self.time_shadow_item, font=font, state=state)
-        self.canvas.itemconfigure(self.time_item, font=font)
-        self.canvas.itemconfigure(self.desc_item, font=('Segoe UI', self.text_font_size))
+        self.canvas.itemconfigure(self.time_shadow_item, font=time_font, state=state)
+        self.canvas.itemconfigure(self.time_item, font=time_font)
+        self.canvas.itemconfigure(self.desc_item, font=self._desc_font())
 
     def reset_mode_timer(self) -> None:
         if self.mode in ('countup', 'countdown'):
@@ -1073,11 +1194,11 @@ class FullscreenClockApp:
         self.redraw_background()
 
     def edit_custom_text(self) -> None:
-        text = dark_askstring(self.root, self.t('text'),
-                               self.t('dialog_custom_text_prompt'),
-                               initialvalue=self.custom_text,
-                               ok_text=self.t('dialog_ok'),
-                               cancel_text=self.t('dialog_cancel'))
+        text = dark_asktext(self.root, self.t('text'),
+                            self.t('dialog_custom_text_prompt'),
+                            initialvalue=self.custom_text,
+                            ok_text=self.t('dialog_ok'),
+                            cancel_text=self.t('dialog_cancel'))
         if text is None:
             return
         self.custom_text = text
