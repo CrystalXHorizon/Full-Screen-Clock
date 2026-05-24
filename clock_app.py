@@ -303,6 +303,8 @@ class FullscreenClockApp:
         self.bg_color = '#080811'
         self.bg_photo = None
         self.bg_scale_percent = 100
+        self._bg_pil_image = None
+        self._bg_pil_path = None
         self.time_font_family = 'Segoe UI'
         self.time_bold = False
         self.time_shadow = True
@@ -1156,7 +1158,7 @@ class FullscreenClockApp:
         self._last_size = new_size
         if hasattr(self, '_resize_after_id') and self._resize_after_id:
             self.root.after_cancel(self._resize_after_id)
-        self._resize_after_id = self.root.after(100, self._flush_resize)
+        self._resize_after_id = self.root.after(300, self._flush_resize)
 
     def _flush_resize(self) -> None:
         self._resize_after_id = None
@@ -1181,6 +1183,8 @@ class FullscreenClockApp:
                 return
 
         self.bg_path = path
+        self._bg_pil_image = None
+        self._bg_pil_path = None
         self.save_user_state()
         self.redraw_background()
 
@@ -1190,6 +1194,8 @@ class FullscreenClockApp:
             return
         self.bg_color = chosen
         self.bg_path = None
+        self._bg_pil_image = None
+        self._bg_pil_path = None
         self.save_user_state()
         self.redraw_background()
 
@@ -1224,7 +1230,11 @@ class FullscreenClockApp:
         if self.bg_path:
             try:
                 if Image is not None:
-                    img = Image.open(self.bg_path)
+                    # ── Cache PIL image to avoid disk I/O on every resize ──
+                    if self._bg_pil_image is None or self._bg_pil_path != self.bg_path:
+                        self._bg_pil_image = Image.open(self.bg_path)
+                        self._bg_pil_path = self.bg_path
+                    img = self._bg_pil_image
                     src_w, src_h = img.size
                     if src_w <= 0 or src_h <= 0:
                         raise ValueError(self.t('dialog_bg_invalid_size'))
@@ -1234,8 +1244,17 @@ class FullscreenClockApp:
                     dst_w = max(int(src_w * final_scale), 1)
                     dst_h = max(int(src_h * final_scale), 1)
 
-                    img = img.resize((dst_w, dst_h), Image.Resampling.LANCZOS)
-                    self.bg_photo = ImageTk.PhotoImage(img)
+                    # ── Release old PhotoImage before creating new one ──
+                    old_photo = self.bg_photo
+                    self.bg_photo = None
+                    if old_photo is not None:
+                        try:
+                            del old_photo
+                        except Exception:
+                            pass
+
+                    resized = img.resize((dst_w, dst_h), Image.Resampling.BILINEAR)
+                    self.bg_photo = ImageTk.PhotoImage(resized)
                     x = (width - dst_w) // 2
                     y = (height - dst_h) // 2
                     self.canvas.create_image(x, y, image=self.bg_photo, anchor='nw', tags='bg')
